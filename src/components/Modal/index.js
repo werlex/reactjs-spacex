@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Carousel from 'components/Carousel'
 import styles from './style.module.scss';
 
 class Modal extends Component{
@@ -11,6 +12,7 @@ class Modal extends Component{
           <span className={styles.close} onClick={onClose}>X</span>
           {images && (
             <div className={styles.sideLeft}>
+              <Carousel items={images} index={0} />
               {images.map((image) => <img className={styles.fullCenter} src={image} />)}
             </div>
           )}

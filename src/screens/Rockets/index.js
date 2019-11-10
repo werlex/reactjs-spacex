@@ -60,9 +60,9 @@ class Home extends Component{
         { !loading &&
           <Fragment>
             <h1>Rockets Page</h1>
-            {rockets.map((rocket) => 
+            {rockets.map((rocket) =>
               <div key={rocket.id} className={`${styles.rocket} ${rocket.active ? styles.active : styles.inactive}`} onClick={() => this.toggleModal(rocket.id)}>
-                {rocket.flickr_images && 
+                {rocket.flickr_images &&
                   <div className={styles.leftSide}>
                     <img src={rocket.flickr_images[0]} className={styles.fullCenter} />
                   </div>
