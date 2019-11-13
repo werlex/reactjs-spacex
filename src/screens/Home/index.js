@@ -4,7 +4,7 @@ import styles from './style.module.scss';
 class Home extends Component{
   render() {
     return (
-      <h1>Home PAge</h1>
+      <h1>Home Page</h1>
     );
   }
 }

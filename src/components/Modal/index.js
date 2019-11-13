@@ -12,8 +12,7 @@ class Modal extends Component{
           <span className={styles.close} onClick={onClose}>X</span>
           {images && (
             <div className={styles.sideLeft}>
-              <Carousel items={images} index={0} />
-              {images.map((image) => <img className={styles.fullCenter} src={image} />)}
+              <Carousel items={images} />
             </div>
           )}
           <div className={styles.sideRight}>
