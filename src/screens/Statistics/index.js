@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import styles from './style.module.scss';
 
-class Home extends Component{
+class Statistics extends Component{
   render() {
     return (
       <h1>Missions PAge</h1>
@@ -9,4 +9,4 @@ class Home extends Component{
   }
 }
 
-export default Home;
+export default Statistics;
