@@ -1,0 +1,23 @@
+@import "styles/base.scss";
+
+.graph{
+  margin: 5px auto;
+
+  .bar{
+    cursor: pointer;
+  }
+}
+
+.tooltip{
+  background: white;
+  padding: 10px;
+
+  .label{
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .description u{
+    color: #13B284;
+  }
+}

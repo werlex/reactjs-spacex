@@ -17,7 +17,7 @@ class Home extends Component{
   }
 
   initialize = async() => {
-    const rockets = await api({path:'rockets'});
+    const rockets = await api({ path:'rockets' });
     console.log({rockets});
     this.setState({
       rockets,
@@ -57,7 +57,7 @@ class Home extends Component{
     const { loading, rockets, modal } = this.state;
     return (
       <Layout loading={loading} className={styles.rokcetList}>
-        { !loading &&
+        {!loading &&
           <Fragment>
             <h1>Rockets Page</h1>
             {rockets.map((rocket) =>

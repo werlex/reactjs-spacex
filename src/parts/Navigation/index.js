@@ -11,10 +11,10 @@ export default function Navigation() {
           <Link to={routes.HOMEPAGE}>Homepage</Link>
         </li>
         <li>
-          <Link to={routes.MISSIONS}>Missions</Link>
+          <Link to={routes.ROCKETS}>Rockets</Link>
         </li>
         <li>
-          <Link to={routes.ROCKETS}>Rockets</Link>
+          <Link to={routes.STATISTICS}>Statistics</Link>
         </li>
       </ul>
     </div>
