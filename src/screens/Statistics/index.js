@@ -1,9 +1,8 @@
 import React, { Component, Fragment } from 'react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-} from 'recharts';
 import api from 'utils/api';
 import Layout from 'components/Layout';
+import StatBox from './components/StatBox';
+import BarChart from './components/BarChart';
 import styles from './style.module.scss';
 
 class Statistics extends Component{
@@ -31,6 +30,12 @@ class Statistics extends Component{
         totalLaunches: 0,
       };
     });
+    launches.forEach(launch => {
+      const id = launch.rocket.rocket_id;
+      const launchCost = rocketsInfo[id].launchCost;
+      rocketsInfo[id].totalSpent += launchCost;
+      rocketsInfo[id].totalLaunches += 1;
+    });
 
     this.setState({
       rockets,
@@ -42,18 +47,22 @@ class Statistics extends Component{
 
   divideByTenth = (number, pow) => parseFloat( number / 10 ** pow );
 
-  convertSpentAmount = amount => amount >= 1000
-    ? `$${+this.divideByTenth(amount, 3).toFixed(3)} Billions`
-    : `$${+amount.toFixed(3)} Millions`
+  convertSpentAmount = amount => {
+    if (amount >= 1000) {
+      const number = this.divideByTenth(amount, 3);
+      return `$${+number.toFixed(3)} Billion${number !== 1 ? 's' : ''}`;
+    } else return `$${+amount.toFixed(3)} Millions`;
+  }
 
   customTooltip = ({ active, payload, label }) => {
     if (active) {
+      const launches = payload[0].payload.totalLaunches;
       return (
         <div className={styles.tooltip}>
           <p className={styles.label}>{label}</p>
           <p className={styles.description}>
             {<Fragment>
-              This rocket was launched <u>{payload[0].payload.totalLaunches}</u> times.<br />
+              This rocket was launched <u>{launches}</u> time{launches !== 1 && 's'}.<br />
               SpaceX spent <u>{this.convertSpentAmount( payload[0].payload.totalSpent )}</u>
             </Fragment>}
           </p>
@@ -64,8 +73,16 @@ class Statistics extends Component{
     return null;
   };
 
-  barClick = data => {
-    this.setState({ selectedRocket: data.id });
+  graphClick = payload => {
+    if(payload) {
+      const active = payload.activePayload;
+      if (active && active.length) {
+        const data = active[0].payload;
+        if (!data.id || this.state.rocketsInfo[data.id].totalLaunches)
+          this.setState({ selectedRocket: data.id });
+        else alert("Sorry, this rocket has not been launched");
+      } else if ("id" in payload) this.setState({ selectedRocket: payload.id });
+    }
   }
 
   constructRocketGraphData = () => {
@@ -74,10 +91,12 @@ class Statistics extends Component{
       launches
       .filter(launch => launch.rocket.rocket_id === selectedRocket)
       .reduce((prev, cur, index) => {
+        let returnData = index === 1 ? {} : prev;
+        if (index === 1) returnData[prev.launch_year] = [prev];
         const year = cur.launch_year;
         const value = [...prev[year] || [], cur];
-        prev[year] = value;
-        return index === 1 ? { [year] : value } : prev;
+        returnData[year] = value;
+        return returnData;
       });
 
     return Object.keys(yearlyLaunches).map(year => {
@@ -87,9 +106,10 @@ class Statistics extends Component{
         totalSpent: yearlyLaunches[year].length < 2
         ? rocketsInfo[yearlyLaunches[year][0].rocket.rocket_id].launchCost
         : yearlyLaunches[year].reduce((prev, cur, index) => {
+          const curRocketId = cur.rocket.rocket_id;
           return index === 1
-            ? rocketsInfo[cur.rocket.rocket_id].launchCost
-            : prev + rocketsInfo[cur.rocket.rocket_id].launchCost;
+            ? rocketsInfo[curRocketId].launchCost + rocketsInfo[prev.rocket.rocket_id].launchCost
+            : prev + rocketsInfo[curRocketId].launchCost;
         }),
       }
     });
@@ -97,66 +117,46 @@ class Statistics extends Component{
 
   render() {
     const { loading, rockets, rocketsInfo, launches, selectedRocket } = this.state;
-    let totalSpent = 0;
+    let allSpentMoneyOnLaunches = 0, totalLaunches = 0, averageRocketCost = 0;
     let graphData = [];
 
     if(launches.length) {
-      launches.forEach(launch => {
-        const id = launch.rocket.rocket_id;
-        const launchCost = rocketsInfo[id].launchCost;
-        totalSpent += launchCost;
-        rocketsInfo[id].totalSpent += launchCost;
-        rocketsInfo[id].totalLaunches += 1;
-      });
-      console.log({launches, rocketsInfo});
-
       graphData = rockets.map(rocket => {
         const id = rocket.rocket_id;
+        const rocketInfo = rocketsInfo[id];
+        const totalSpent = rocketInfo.totalSpent;
+        allSpentMoneyOnLaunches += totalSpent;
+        totalLaunches += rocketInfo.totalLaunches;
+        averageRocketCost += rocketInfo.launchCost;
         return {
-          totalSpent: rocketsInfo[id].totalSpent,
-          totalLaunches: rocketsInfo[id].totalLaunches,
+          totalSpent,
+          totalLaunches: rocketInfo.totalLaunches,
           name: rocket.rocket_name,
           id,
         };
       });
+      averageRocketCost = averageRocketCost / rockets.length;
     }
 
     return (
       <Layout loading={loading} className={styles.rokcetList}>
         {!loading &&
           <Fragment>
-            <h1>Statistics Page</h1>
-            <div className={styles.textCenter}>
-              Spent total on all launches is ${this.divideByTenth(totalSpent, 3).toFixed(3)}B
-              {selectedRocket && <Fragment><br /><u onClick={() => this.barClick({id: null})}>Back</u></Fragment>}
+            <h1>Statistics</h1>
+            <div className={styles.statBoxes}>
+              <StatBox label="All launches cost:" number={this.convertSpentAmount(allSpentMoneyOnLaunches)} />
+              <StatBox label="Total launches:" number={totalLaunches} />
+              <StatBox label="Average launch cost:" number={`$${(allSpentMoneyOnLaunches / totalLaunches).toFixed(3)}M`} />
+              <StatBox label="Average Rocket launch cost:" number={`$${averageRocketCost.toFixed(3)}M`} />
             </div>
+            {selectedRocket
+              ? <div className={styles.back} onClick={() => this.graphClick({id: null})}>Back</div>
+              : <div className={styles.textCenter}>Click on column to see yearly launches for that rocket</div>}
             {graphData.length && !selectedRocket &&
-              <BarChart
-                width={600}
-                height={400}
-                data={graphData}
-                className={styles.graph}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis label={{ value: "$ Millions", angle: -90, position: "insideLeft"}} />
-                <Tooltip content={this.customTooltip} />
-                <Bar dataKey="totalSpent" fill="#8884d8" className={styles.bar} onClick={this.barClick} minPointSize={3} />
-              </BarChart>
+              <BarChart data={graphData} onClick={this.graphClick} tooltip={this.customTooltip} />
             }
             {selectedRocket &&
-              <BarChart
-                width={600}
-                height={400}
-                data={this.constructRocketGraphData()}
-                className={styles.graph}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis label={{ value: "$ Millions", angle: -90, position: "insideLeft"}} />
-                <Tooltip content={this.customTooltip} />
-                <Bar dataKey="totalSpent" fill="#8884d8" className={styles.bar} onClick={this.barClick} minPointSize={3} />
-              </BarChart>
+              <BarChart data={this.constructRocketGraphData()} tooltip={this.customTooltip} />
             }
           </Fragment>
         }

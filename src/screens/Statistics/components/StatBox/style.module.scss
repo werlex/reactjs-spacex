@@ -1,0 +1,22 @@
+@import "styles/base.scss";
+
+.box{
+  width: 24%;
+  padding: 10px;
+  border: 1px solid $green;
+  text-align: center;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .label{
+    font-size: 18px;
+  }
+
+  .number{
+    text-decoration: underline;
+    font-size: 22px;
+    font-weight: 600;
+  }
+}

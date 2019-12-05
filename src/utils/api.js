@@ -11,7 +11,7 @@ const api = async (meta) => {
     const res = await axios.get(url);
     return res.data;
   } catch (error) {
-    throw {error};
+    console.log({error});
   }
 };
 

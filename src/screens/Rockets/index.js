@@ -18,7 +18,6 @@ class Home extends Component{
 
   initialize = async() => {
     const rockets = await api({ path:'rockets' });
-    console.log({rockets});
     this.setState({
       rockets,
       loading: false,
@@ -39,13 +38,19 @@ class Home extends Component{
   generateModal = () => {
     const { rockets, modalRocketID } = this.state;
     const rocket = rockets.find((rocket) => rocket.id === modalRocketID);
-
     if(rocket){
       const {flickr_images: images, description, rocket_name: name} = rocket;
       return(
         <Modal onClose={this.toggleModal} images={images}>
           <h2>{name}</h2>
-          <p>{description}</p>
+          <p>{description}<br /></p>
+          <p><br />
+            <u className={styles.label}>Active</u>: {rocket.active ? "Yes" : "No"}<br/>
+            <u className={styles.label}>Cost per Launch</u>: ${rocket.cost_per_launch/1000000}M<br/>
+            <u className={styles.label}>First Flight</u>: {rocket.first_flight}<br/>
+            <u className={styles.label}>Success rate</u>: {rocket.success_rate_pct}%<br/>
+            <u className={styles.label}>Wikipedia link</u>: <a href={rocket.wikipedia} rel="noopener noreferrer" target="_blank">{rocket.wikipedia}</a><br/>
+          </p>
         </Modal>
       );
     }
@@ -59,12 +64,12 @@ class Home extends Component{
       <Layout loading={loading} className={styles.rokcetList}>
         {!loading &&
           <Fragment>
-            <h1>Rockets Page</h1>
+            <h1>Rockets</h1>
             {rockets.map((rocket) =>
               <div key={rocket.id} className={`${styles.rocket} ${rocket.active ? styles.active : styles.inactive}`} onClick={() => this.toggleModal(rocket.id)}>
                 {rocket.flickr_images &&
                   <div className={styles.leftSide}>
-                    <img src={rocket.flickr_images[0]} className={styles.fullCenter} />
+                    <img src={rocket.flickr_images[0]} alt="" className={styles.fullCenter} />
                   </div>
                 }
                 <div className={styles.rightSide}>

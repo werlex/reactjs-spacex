@@ -1,11 +1,17 @@
 @import "styles/base.scss";
 
-.graph{
-  margin: 5px auto;
+.statBoxes{
+  display: flex;
+  justify-content: space-between;
+  max-width: 1000px;
+  margin: 20px auto;
+}
 
-  .bar{
-    cursor: pointer;
-  }
+.back{
+  width: 100%;
+  text-decoration: underline;
+  text-align: center;
+  cursor: pointer;
 }
 
 .tooltip{
@@ -18,6 +24,6 @@
   }
 
   .description u{
-    color: #13B284;
+    color: $green;
   }
 }
